@@ -3,6 +3,6 @@
 class Home
 {
   public function index() {
-    require '../../views/home_index.php';
+    require __DIR__ . '/../../views/home_index.php';
   }
 }
