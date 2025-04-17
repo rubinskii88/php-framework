@@ -12,4 +12,9 @@ class Products
 
     require __DIR__ . '/../../views/products_index.php';
   }
+  
+  public function show()
+  {
+    require __DIR__ . '/../../views/products_show.php';
+  }
 }
