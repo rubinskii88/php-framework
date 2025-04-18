@@ -3,8 +3,18 @@
 $path = $_SERVER['REQUEST_URI'];
 $path = parse_url($path, PHP_URL_PATH);
 
-require 'src/Router.php';
-$router = new Router;
+function autoload($className)
+{
+  
+  $path = str_replace('\\', '/', $className);
+  
+  require __DIR__ . '/src/' . $path . '.php';
+}
+
+spl_autoload_register('autoload');
+
+// require 'src/Router.php';
+$router = new Framework\Router;
 
 $router->add('/home/index', ['controller' => 'Home', 'action' => 'index']);
 $router->add('/products', ['controller' => 'Products', 'action' => 'index']);
@@ -16,10 +26,10 @@ if($params === false) {
   exit('no route for this path');
 }
 
-$controller = $params['controller'];
+$controller = 'App\Controllers\\' . ucwords($params['controller']);
 $action = $params['action'];
 
-require 'src/Controllers/' . $controller . '.php';
+// require 'src/Controllers/' . $controller . '.php';
 
 $controllerObject = new $controller;
 $controllerObject->$action();
