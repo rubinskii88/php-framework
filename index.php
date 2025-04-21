@@ -15,13 +15,14 @@ function autoload($className)
 
 spl_autoload_register('autoload');
 
-// require 'src/Router.php';
 $router = new Framework\Router;
 
+$router->add('/product/{slug:[\w-]+}', ['controller' => 'Products', 'action' => 'show']);
+$router->add('/{controller}/{id:\d+}/{action}');
+$router->add('/home/index', ['controller' => 'Home', 'action' => 'index']);
+$router->add('/products', ['controller' => 'Products', 'action' => 'index']);
+$router->add('/', ['controller' => 'Home', 'action' => 'index']);
 $router->add('/{controller}/{action}');
-// $router->add('/home/index', ['controller' => 'Home', 'action' => 'index']);
-// $router->add('/products', ['controller' => 'Products', 'action' => 'index']);
-// $router->add('/', ['controller' => 'Home', 'action' => 'index']);
 
 $params = $router->match($path);
 
@@ -31,8 +32,6 @@ if($params === false) {
 
 $controller = 'App\Controllers\\' . ucwords($params['controller']);
 $action = $params['action'];
-
-// require 'src/Controllers/' . $controller . '.php';
 
 $controllerObject = new $controller;
 $controllerObject->$action();

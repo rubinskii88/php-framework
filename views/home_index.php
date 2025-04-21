@@ -1,1 +1,1 @@
-home index
+view home index

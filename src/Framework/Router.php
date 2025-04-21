@@ -17,31 +17,28 @@ class Router
 
   public function match(string $path): array|bool
   {
+    
+    $path = urldecode($path);
+    
+    $path = trim($path, '/');
 
     foreach ($this->routes as $route) {
-      $pattern = '#^/(?<controller>[a-z]+)/(?<action>[a-z]+)$#';
 
-      echo '<pre>';
-
-      d($pattern);
-      d($route['path']);
-      
-
-
-      $this->getPatternFromRoutePath($route['path']);
+      $pattern = $this->getPatternFromRoutePath($route['path']);
 
       if (preg_match($pattern, $path, $matches)) {
-
         $matches = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
 
-        return $matches;
+        $params = array_merge($matches, $route['params']);
+
+        return $params;
       }
     }
 
     return false;
   }
 
-  private function getPatternFromRoutePath(string $routePath)
+  private function getPatternFromRoutePath(string $routePath): string
   {
 
     $routePath = trim($routePath, '/');
@@ -50,16 +47,26 @@ class Router
 
     $segments = array_map(
       function (string $segment): string {
+
+        if (preg_match('#^\{([a-z][a-z0-9]*)\}$#', $segment, $matches)) {
+          return '(?<' . $matches[1] . '>[^/]*)';
+        }
         
-        preg_match('#^\{([a-z][a-z0-9]*)\}$#', $segment, $matches);
-        
-        $segment = '(?<' . $matches[1] . '>[a-z]+)';
-        // d($matches);
+        if (preg_match('#^\{([a-z][a-z0-9]*):(.+)\}$#', $segment, $matches)) {
+          return '(?<' . $matches[1] . '>' . $matches[2] . ')';
+        }
+
         return $segment;
       },
       $segments
     );
 
-    d($segments);
+    // d($segments);
+
+    $pattern = '#^' . implode('/', $segments) . '$#iu';
+
+    return $pattern;
+
+    d($pattern);
   }
 }
