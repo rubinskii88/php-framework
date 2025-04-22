@@ -15,8 +15,15 @@ class Products
     require __DIR__ . '/../../../views/products_index.php';
   }
   
-  public function show()
+  public function show(string $id)
   {
+    
+    var_dump($id);
     require __DIR__ . '/../../../views/products_show.php';
+  }
+  
+  public function showPage(string $title, string $id, string $page)
+  {
+    d($title, $id, $page);
   }
 }

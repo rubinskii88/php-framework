@@ -17,9 +17,9 @@ class Router
 
   public function match(string $path): array|bool
   {
-    
+
     $path = urldecode($path);
-    
+
     $path = trim($path, '/');
 
     foreach ($this->routes as $route) {
@@ -27,9 +27,14 @@ class Router
       $pattern = $this->getPatternFromRoutePath($route['path']);
 
       if (preg_match($pattern, $path, $matches)) {
+        // dd($matches);
         $matches = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
 
+        // dd($matches);
+        
         $params = array_merge($matches, $route['params']);
+        
+        // dd($params);
 
         return $params;
       }
@@ -43,15 +48,19 @@ class Router
 
     $routePath = trim($routePath, '/');
 
+
+
     $segments = explode('/', $routePath);
+
+    // dd($segments);
 
     $segments = array_map(
       function (string $segment): string {
-
+// dd($segment);
         if (preg_match('#^\{([a-z][a-z0-9]*)\}$#', $segment, $matches)) {
           return '(?<' . $matches[1] . '>[^/]*)';
         }
-        
+
         if (preg_match('#^\{([a-z][a-z0-9]*):(.+)\}$#', $segment, $matches)) {
           return '(?<' . $matches[1] . '>' . $matches[2] . ')';
         }
@@ -61,12 +70,13 @@ class Router
       $segments
     );
 
-    // d($segments);
+    // dd($segments);
 
     $pattern = '#^' . implode('/', $segments) . '$#iu';
 
+    // dd($pattern);
+
     return $pattern;
 
-    d($pattern);
   }
 }
