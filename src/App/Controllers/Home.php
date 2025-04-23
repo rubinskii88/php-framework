@@ -2,9 +2,13 @@
 
 namespace App\Controllers;
 
+use Framework\View;
+
 class Home
 {
   public function index() {
-    require __DIR__ . '/../../../views/home_index.php';
+    $view = new View;
+
+    echo $view->render('home/index');
   }
 }

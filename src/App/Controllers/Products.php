@@ -3,6 +3,8 @@
 namespace App\Controllers;
 use App\Models\Product;
 
+use Framework\View;
+
 class Products
 {
   public function index()
@@ -11,15 +13,26 @@ class Products
     $model = new Product;
 
     $products = $model->getData();
+    
+    $view = new View;
 
-    require __DIR__ . '/../../../views/products_index.php';
+    echo $view->render('shared/header', ['title' => 'all products']);
+    
+    echo $view->render('products/index', [
+      'products' => $products
+    ]);
   }
   
   public function show(string $id)
   {
     
-    var_dump($id);
-    require __DIR__ . '/../../../views/products_show.php';
+    $view = new View;
+    
+    echo $view->render('shared/header');
+    
+    echo $view->render('products/show', [
+      'id' => $id
+    ]);
   }
   
   public function showPage(string $title, string $id, string $page)
