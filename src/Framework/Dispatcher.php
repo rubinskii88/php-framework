@@ -2,6 +2,7 @@
 
 namespace Framework;
 
+use ReflectionClass;
 use ReflectionMethod;
 
 class Dispatcher
@@ -21,10 +22,7 @@ class Dispatcher
     $controller = $this->getControllerName($params);
     $action = $this->getActionName($params);
 
-    
-    
-    $controllerObject = new $controller;
-    
+    $controllerObject = $this->getObject($controller);
 
     $args = $this->getActionArguments($controller, $action, $params);
 
@@ -59,8 +57,6 @@ class Dispatcher
       $namespace .= '\\' . $params['namespace'];
     }
 
-    // dd($namespace . '\\' . $controller);
-    
     return $namespace . '\\' . $controller;
   }
 
@@ -73,5 +69,30 @@ class Dispatcher
     $action = lcfirst($action);
 
     return $action;
+  }
+
+  private function getObject(string $className): object
+  {
+    $reflector = new ReflectionClass($className);
+
+    $constructor = $reflector->getConstructor();
+
+    $dependencies = [];
+
+    if ($constructor === null) {
+      return new $className;
+    }
+
+    foreach ($constructor->getParameters() as $parameter) {
+      $type = (string) $parameter->getType();
+
+      $dependencies[] = $this->getObject($type);
+    }
+
+    return new $className(...$dependencies);
+
+    // $controllerObject = new $className(...$dependencies);
+
+    // return $controllerObject;
   }
 }

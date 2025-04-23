@@ -7,18 +7,24 @@ use Framework\View;
 
 class Products
 {
+  
+  public function __construct(
+    private View $view,
+    private Product $model
+    )
+  {
+    
+  }
   public function index()
   {
 
-    $model = new Product;
 
-    $products = $model->getData();
+    $products = $this->model->getData();
     
-    $view = new View;
 
-    echo $view->render('shared/header', ['title' => 'all products']);
+    echo $this->view->render('shared/header', ['title' => 'all products']);
     
-    echo $view->render('products/index', [
+    echo $this->view->render('products/index', [
       'products' => $products
     ]);
   }
@@ -26,11 +32,11 @@ class Products
   public function show(string $id)
   {
     
-    $view = new View;
+
     
-    echo $view->render('shared/header');
+    echo $this->view->render('shared/header');
     
-    echo $view->render('products/show', [
+    echo $this->view->render('products/show', [
       'id' => $id
     ]);
   }
