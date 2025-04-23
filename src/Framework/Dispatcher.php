@@ -1,18 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Framework;
 
-use ReflectionClass;
 use ReflectionMethod;
 
 class Dispatcher
 {
-  public function __construct(private Router $router) {}
+  public function __construct(
+    private Router $router,
+    private Container $container
+    ) {}
 
   public function handle(string $path)
   {
-
-
     $params = $this->router->match($path);
 
     if ($params === false) {
@@ -22,7 +24,7 @@ class Dispatcher
     $controller = $this->getControllerName($params);
     $action = $this->getActionName($params);
 
-    $controllerObject = $this->getObject($controller);
+    $controllerObject = $this->container->get($controller);
 
     $args = $this->getActionArguments($controller, $action, $params);
 
@@ -71,28 +73,5 @@ class Dispatcher
     return $action;
   }
 
-  private function getObject(string $className): object
-  {
-    $reflector = new ReflectionClass($className);
-
-    $constructor = $reflector->getConstructor();
-
-    $dependencies = [];
-
-    if ($constructor === null) {
-      return new $className;
-    }
-
-    foreach ($constructor->getParameters() as $parameter) {
-      $type = (string) $parameter->getType();
-
-      $dependencies[] = $this->getObject($type);
-    }
-
-    return new $className(...$dependencies);
-
-    // $controllerObject = new $className(...$dependencies);
-
-    // return $controllerObject;
-  }
+  
 }

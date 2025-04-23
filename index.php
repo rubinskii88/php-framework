@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 require __DIR__ . '/config/debug.php';
 
 $path = $_SERVER['REQUEST_URI'];
@@ -26,5 +28,13 @@ $router->add('/products', ['controller' => 'Products', 'action' => 'index']);
 $router->add('/', ['controller' => 'Home', 'action' => 'index']);
 $router->add('/{controller}/{action}');
 
-$dispatcher = new Framework\Dispatcher($router);
+$container = new Framework\Container;
+
+// $database = new App\Database('192.168.1.59', 'product_db', 'product_db_user', 'secret');
+
+$container->set(App\Database::class, function () {
+  return new App\Database('192.168.1.59', 'product_db', 'product_db_user', 'secret');
+});
+
+$dispatcher = new Framework\Dispatcher($router, $container);
 $dispatcher->handle($path);
