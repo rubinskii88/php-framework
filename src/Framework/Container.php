@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Framework;
 
 use Closure;
+use Exception;
+use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionNamedType;
 
@@ -43,7 +45,7 @@ class Container
       $type = $parameter->getType();
       
       if($type === null) {
-        dd("
+        throw new InvalidArgumentException("
           constructor param {$parameter->getName()}
           in class {$className}
           has no type declared
@@ -51,7 +53,7 @@ class Container
       }
       
       if( ! $type instanceof ReflectionNamedType) {
-        dd("
+        throw new InvalidArgumentException("
           constructor param {$parameter->getName()}
           in class {$className}
           has invalid type {$type}
@@ -60,7 +62,7 @@ class Container
       }
       
       if($type->isBuiltin()) {
-        dd('unable to resolve constructor param - ' . $parameter->getName() . ' of type - ' . $type . ' in ' . $className);
+        throw new InvalidArgumentException('unable to resolve constructor param - ' . $parameter->getName() . ' of type - ' . $type . ' in ' . $className);
       }
       
       $dependencies[] = $this->get((string) $type);

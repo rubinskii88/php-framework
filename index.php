@@ -2,10 +2,62 @@
 
 declare(strict_types=1);
 
+// ini_set('error_log', 'logs/php_errors.log');
+
+set_error_handler(function (
+  int $errno,
+  string $errstr,
+  string $errfile,
+  int $errline
+): bool {
+  throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+});
+
+set_exception_handler(function (Throwable $exception) {
+
+  if ($exception instanceof Framework\Exceptions\PageNotFoundException) {
+
+    http_response_code(404);
+
+    $template = "404.php";
+  } else {
+
+    http_response_code(500);
+
+    $template = "500.php";
+  }
+
+  $show_errors = false;
+
+  if ($show_errors) {
+
+    ini_set("display_errors", "1");
+  } else {
+
+    ini_set("display_errors", "0");
+
+    ini_set("log_errors", "1");
+    
+    ini_set('error_log', 'logs/php_errors.log');
+
+    require "views/errors/$template";
+  }
+
+  throw $exception;
+});
+
+
+
 require __DIR__ . '/config/debug.php';
 
 $path = $_SERVER['REQUEST_URI'];
 $path = parse_url($path, PHP_URL_PATH);
+
+if ($path === false) {
+  throw new UnexpectedValueException(
+    "malformed url - {$_SERVER['REQUEST_URI']}"
+  );
+}
 
 function autoload($className)
 {
