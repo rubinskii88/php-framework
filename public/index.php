@@ -2,15 +2,17 @@
 
 declare(strict_types=1);
 
-require 'config/autoload.php';
+define('ROOT_PATH', dirname(__DIR__));
+
+require ROOT_PATH . '/config/autoload.php';
 
 $dotenv = new Framework\Dotenv;
-$dotenv->load('.env');
+$dotenv->load(ROOT_PATH . '/.env');
 
 set_error_handler('Framework\ErrorHandler::handleError');
 set_exception_handler('Framework\ErrorHandler::handleException');
 
-require __DIR__ . '/config/debug.php';
+require ROOT_PATH . '/config/debug.php';
 
 $path = $_SERVER['REQUEST_URI'];
 $path = parse_url($path, PHP_URL_PATH);
@@ -21,9 +23,9 @@ if ($path === false) {
   );
 }
 
-$router = require 'config/routes.php';
+$router = require ROOT_PATH . '/config/routes.php';
 
-$container = require 'config/services.php';
+$container = require ROOT_PATH . '/config/services.php';
 
 $dispatcher = new Framework\Dispatcher($router, $container);
 $dispatcher->handle($path);

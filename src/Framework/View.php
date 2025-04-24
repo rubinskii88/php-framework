@@ -11,7 +11,7 @@ class View
     extract($data, EXTR_SKIP);
 
     ob_start();
-    require __DIR__ . '/../../views/' . $template . '.php';
+    require dirname(__DIR__, 2) . '/views/' . $template . '.php';
 
     return ob_get_clean();
   }

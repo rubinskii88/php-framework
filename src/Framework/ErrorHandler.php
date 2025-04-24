@@ -46,7 +46,7 @@ class ErrorHandler
 
       ini_set('error_log', 'logs/php_errors.log');
 
-      require "views/errors/$template";
+      require dirname(__DIR__, 2) . "/views/errors/$template";
     }
 
     throw $exception;
