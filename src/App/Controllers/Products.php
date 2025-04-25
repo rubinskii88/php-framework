@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Models\Product;
+use Framework\Controller;
 use Framework\Exceptions\PageNotFoundException;
-use Framework\View;
 
-class Products
+class Products extends Controller
 {
 
   public function __construct(
-    private View $view,
     private Product $model
   ) {}
 
@@ -66,8 +65,8 @@ class Products
   public function create()
   {
     $data = [
-      'name' => $_POST['name'],
-      'description' => $_POST['description'] ?? null
+      'name' => $this->request->post['name'],
+      'description' => $this->request->post['description'] ?? null
     ];
 
     if ($this->model->insert($data)) {
@@ -89,8 +88,8 @@ class Products
   {
     $product = $this->getProduct($id);
 
-    $product["name"] = $_POST["name"];
-    $product["description"] = empty($_POST["description"]) ? null : $_POST["description"];
+    $product["name"] = $this->request->post["name"];
+    $product["description"] = empty($this->request->post["description"]) ? null : $this->request->post["description"];
 
     if ($this->model->update($id, $product)) {
       header("Location: /products/{$id}/show");
@@ -111,13 +110,6 @@ class Products
   public function delete(string $id): void
   {
     $product = $this->getProduct($id);
-
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-      $this->model->delete($id);
-      
-      header("Location: /products/index");
-      exit;
-    }
 
     echo $this->view->render("shared/header", [
       "title" => "delete product"
@@ -141,5 +133,15 @@ class Products
   public function showPage(string $title, string $id, string $page)
   {
     d($title, $id, $page);
+  }
+
+  public function destroy(string $id)
+  {
+    $product = $this->getProduct($id);
+
+    $this->model->delete($id);
+
+    header("Location: /products/index");
+    exit;
   }
 }

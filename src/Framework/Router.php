@@ -17,7 +17,7 @@ class Router
     ];
   }
 
-  public function match(string $path): array|bool
+  public function match(string $path, string $method): array|bool
   {
 
     $path = urldecode($path);
@@ -29,14 +29,14 @@ class Router
       $pattern = $this->getPatternFromRoutePath($route['path']);
 
       if (preg_match($pattern, $path, $matches)) {
-        // dd($matches);
         $matches = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
-
-        // dd($matches);
-        
         $params = array_merge($matches, $route['params']);
-        
-        // dd($params);
+
+        if (array_key_exists('method', $params)) {
+          if (strtolower($method) !== strtolower($params['method'])) {
+            continue;
+          }
+        }
 
         return $params;
       }
@@ -58,7 +58,7 @@ class Router
 
     $segments = array_map(
       function (string $segment): string {
-// dd($segment);
+        // dd($segment);
         if (preg_match('#^\{([a-z][a-z0-9]*)\}$#', $segment, $matches)) {
           return '(?<' . $matches[1] . '>[^/]*)';
         }
@@ -79,6 +79,5 @@ class Router
     // dd($pattern);
 
     return $pattern;
-
   }
 }

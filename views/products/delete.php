@@ -8,7 +8,7 @@
 </p>
 <form
   method="post"
-  action="/products/<?= $product['id'] ?>/delete">
+  action="/products/<?= $product['id'] ?>/destroy">
   <p>
     delete product?
   </p>
