@@ -8,6 +8,7 @@ use PDO;
 
 class Database
 {
+  private ?PDO $pdo = null;
 
   public function __construct(
     private string $host,
@@ -19,12 +20,14 @@ class Database
   }
   public function getConnection(): PDO
   {
-    // $dsn = 'mysql:host=192.168.1.59;dbname=product_db;charset=utf8mb4;port=3306';
-    // 'product_db_user', 'secret'
-    $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbName . ';charset=utf8mb4;port=3306';
+    if ($this->pdo === null) {
+      $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbName . ';charset=utf8mb4;port=3306';
 
-    return new PDO($dsn, $this->user, $this->password, [
-      PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-    ]);
+      $this->pdo = new PDO($dsn, $this->user, $this->password, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+      ]);
+    }
+
+    return $this->pdo;
   }
 }
