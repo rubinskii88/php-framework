@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Models\Product;
 use Framework\Controller;
 use Framework\Exceptions\PageNotFoundException;
+use Framework\Response;
 
 class Products extends Controller
 {
@@ -15,54 +16,45 @@ class Products extends Controller
     private Product $model
   ) {}
 
-  public function index()
+  public function index(): Response
   {
     $products = $this->model->findAll();
 
-    echo $this->view->render('shared/header', ['title' => 'all products']);
-
-    echo $this->view->render('products/index', [
+    return $this->view('products/index', [
+      'title' => 'all products',
       'products' => $products,
       'totalRows' => $this->model->getTotalRows()
     ]);
   }
 
-  public function show(string $id)
+  public function show(string $id): Response
   {
     $product = $this->getProduct($id);
 
-    echo $this->view->render('shared/header', [
-      'title' => 'show product ' . $product['id']
-    ]);
-
-    echo $this->view->render('products/show', [
+    return $this->view('products/show', [
+      'title' => "show product {$product['id']}",
       'product' => $product
     ]);
   }
 
-  public function edit(string $id)
+  public function edit(string $id): Response
   {
     $product = $this->getProduct($id);
 
-    echo $this->view->render('shared/header', [
-      'title' => 'edit product ' . $product['id']
-    ]);
-
-    echo $this->view->render('products/edit', [
+    return $this->view('products/edit', [
+      'title' => "edit product {$product['id']}",
       'product' => $product
     ]);
   }
 
-  public function new()
+  public function new(): Response
   {
-    echo $this->view->render('shared/header', [
+    return $this->view('products/new', [
       'title' => 'add new product'
     ]);
-
-    echo $this->view->render('products/new');
   }
 
-  public function create()
+  public function create(): Response
   {
     $data = [
       'name' => $this->request->post['name'],
@@ -70,21 +62,19 @@ class Products extends Controller
     ];
 
     if ($this->model->insert($data)) {
-      header("Location: /products/{$this->model->getInsertedId()}/show");
-      exit;
-    } else {
-      echo $this->view->render('shared/header', [
-        'title' => 'add new product'
-      ]);
 
-      echo $this->view->render('products/new', [
+      return $this->redirect("/products/{$this->model->getInsertedId()}/show");
+    } else {
+
+      return $this->view('products/new', [
+        'title' => 'add new product',
         'errors' => $this->model->getErrors(),
         'product' => $data
       ]);
     }
   }
 
-  public function update(string $id)
+  public function update(string $id): Response
   {
     $product = $this->getProduct($id);
 
@@ -92,30 +82,23 @@ class Products extends Controller
     $product["description"] = empty($this->request->post["description"]) ? null : $this->request->post["description"];
 
     if ($this->model->update($id, $product)) {
-      header("Location: /products/{$id}/show");
-      exit;
+      return $this->redirect("/products/{$id}/show");
     } else {
 
-      echo $this->view->render("shared/header", [
-        "title" => "edit product"
-      ]);
-
-      echo $this->view->render("products/edit", [
+      return $this->view("products/edit", [
+        "title" => "edit product",
         "errors" => $this->model->getErrors(),
         "product" => $product
       ]);
     }
   }
 
-  public function delete(string $id): void
+  public function delete(string $id): Response
   {
     $product = $this->getProduct($id);
 
-    echo $this->view->render("shared/header", [
-      "title" => "delete product"
-    ]);
-
-    echo $this->view->render("products/delete", [
+    return $this->view("products/delete", [
+      "title" => "delete product",
       "product" => $product
     ]);
   }
@@ -135,13 +118,21 @@ class Products extends Controller
     d($title, $id, $page);
   }
 
-  public function destroy(string $id)
+  public function destroy(string $id): Response
   {
     $product = $this->getProduct($id);
 
     $this->model->delete($id);
 
-    header("Location: /products/index");
-    exit;
+    return $this->redirect("/products/index");
+  }
+
+  public function responseCodeExample(): Response
+  {
+    $this->response->setStatusCode(451);
+
+    $this->response->setBody('unavaliable for legal reasons');
+
+    return $this->response;
   }
 }

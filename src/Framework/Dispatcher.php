@@ -15,7 +15,7 @@ class Dispatcher
     private Container $container
   ) {}
 
-  public function handle(Request $request)
+  public function handle(Request $request): Response
   {
     $path = $this->getPath($request->uri);
 
@@ -31,11 +31,13 @@ class Dispatcher
     $controllerObject = $this->container->get($controller);
 
     $controllerObject->setRequest($request);
-    $controllerObject->setView($this->container->get(View::class));
+    $controllerObject->setResponse($this->container->get(Response::class));
+    
+    $controllerObject->setView($this->container->get(ViewInterface::class));
 
     $args = $this->getActionArguments($controller, $action, $params);
 
-    $controllerObject->$action(...$args);
+    return $controllerObject->$action(...$args);
   }
 
   public function getPath(string $uri): string

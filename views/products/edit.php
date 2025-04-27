@@ -1,3 +1,5 @@
+<?php require __DIR__ . '/../shared/header.php' ?>
+
 <h2>
   edit product
 </h2>
