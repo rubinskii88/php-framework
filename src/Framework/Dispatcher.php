@@ -12,7 +12,8 @@ class Dispatcher
 {
   public function __construct(
     private Router $router,
-    private Container $container
+    private Container $container,
+    private array $middlewareClasses
   ) {}
 
   public function handle(Request $request): Response
@@ -30,14 +31,26 @@ class Dispatcher
 
     $controllerObject = $this->container->get($controller);
 
-    $controllerObject->setRequest($request);
     $controllerObject->setResponse($this->container->get(Response::class));
-    
+
     $controllerObject->setView($this->container->get(ViewInterface::class));
 
     $args = $this->getActionArguments($controller, $action, $params);
 
-    return $controllerObject->$action(...$args);
+    $controllerRequestHandler = new ControllerRequestHandler(
+      $controllerObject,
+      $action,
+      $args
+    );
+
+    $middleware = $this->getMiddleware($params);
+
+    $middlewareRequestHandler = new MiddlewareRequestHandler(
+      $middleware,
+      $controllerRequestHandler
+    );
+
+    return $middlewareRequestHandler->handle($request);
   }
 
   public function getPath(string $uri): string
@@ -94,4 +107,42 @@ class Dispatcher
 
     return $action;
   }
+
+  private function getMiddleware(array $params): array
+  {
+    if (!array_key_exists('middleware', $params)) {
+      return [];
+    }
+
+    $middleware = explode('|', $params['middleware']);
+
+    array_walk($middleware, function (&$value) {
+      if(!array_key_exists($value, $this->middlewareClasses)) {
+        throw new UnexpectedValueException("middleware {$value} not found in config");
+      }
+      
+      $value = $this->container->get($this->middlewareClasses[$value]);
+    });
+
+    return $middleware;
+  }
+
+  // private function getMiddleware(array $params): array
+  // {
+  //   if (!array_key_exists('middleware', $params)) {
+  //     return [];
+  //   }
+
+  //   $middleware = explode('|', $params['middleware']);
+
+  //   array_walk($middleware, function (&$value) {
+  //     if (!isset($this->middlewareClasses[$value])) {
+  //       throw new \RuntimeException("Middleware '{$value}' is not defined in config.");
+  //     }
+
+  //     $value = $this->container->get($this->middlewareClasses[$value]);
+  //   });
+
+  //   return $middleware;
+  // }
 }
